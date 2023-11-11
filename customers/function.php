@@ -133,6 +133,51 @@
         }
     }
 
+    function getTotalPriceByCustomerId($customerParams) {
+        global $conn;
+
+        if ($customerParams['id'] == null) {
+            return error422('Enter your customer id');
+        }
+
+        $customerId = mysqli_real_escape_string($conn, $customerParams['id']);
+
+        $query = "SELECT SUM(price) AS total_price FROM vehicle WHERE customerId = $customerId";
+        $result = mysqli_query($conn, $query);
+
+        if($result) {
+            $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            if (mysqli_num_rows($result)) {
+                
+
+                $data = [
+                    'status' => 200,
+                    'message' => 'Price Fetched Successfuly',
+                    'data' => $res
+                ];
+                header("HTTP/1.0 200 OK");
+                return json_encode($data);
+
+            } else {
+                $data = [
+                    'status' => 404,
+                    'message' => 'No Price Found',
+                    'data' => $res
+                ];
+                header("HTTP/1.0 404 No Price Found");
+                return json_encode($data);
+            }
+
+        } else {
+            $data = [
+                'status' => 500,
+                'message' => 'Internal Server Error',
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
+            return json_encode($data);
+        }
+    }
+
     function updateCustomer($customerInput, $customerParams) {
         global $conn;
 
@@ -162,7 +207,7 @@
         else {
             $query = "UPDATE customers SET name='$name', address='$address', phoneNumber='$phoneNumber', idCard='$idCard' WHERE id='$customerId' LIMIT 1";
             $result = mysqli_query($conn, $query);
-            
+
             if ($result) {
                 $data = [
                     'status' => 200,
@@ -195,7 +240,10 @@
         $query = "DELETE FROM customers WHERE id='$customerId' LIMIT 1";
         $result = mysqli_query($conn, $query);
 
-        if ($result) {
+        $query2 = "DELETE FROM vehicle WHERE vehicle.customer='$customerId'";
+        $result2 = mysqli_query($conn, $query2);
+
+        if ($result || $result2) {
 
             $data = [
                 'status' => 200,

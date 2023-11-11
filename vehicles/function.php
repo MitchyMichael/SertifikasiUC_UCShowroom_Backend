@@ -74,25 +74,21 @@
 
         else {
             $query = "INSERT INTO vehicle (customerId, type, model, year, passengerCount, manufacturer, price) VALUES (' $customerId', '$type', '$model', '$year', '$passengerCount', '$manufacturer', '$price')";
-            // echo $query;
             $result = mysqli_query($conn, $query);
-            // echo $result;
-
             $vehicleId = $conn->insert_id;
-            // echo $vehicleId;
-
+            
             if ($type == "Car") {
                 $query2 = "INSERT INTO car (vehicleId, fuelType, trunkSize) VALUES ('$vehicleId', '$fuelType', '$trunkSize')";
-                echo $query2;
+                // echo $query2;
                 $result = mysqli_query($conn, $query2);
             } else if ($type == 'Truck') {
                 $query2 = "INSERT INTO truck (vehicleID, wheelCount, cargoAreaSize) VALUES ('$vehicleId', '$wheelCount', '$cargoAreaSize')";
                 $result = mysqli_query($conn, $query2);
-                echo $query2;
+                // echo $query2;
             } else if ($type == 'Motorcycle') {
                 $query2 = "INSERT INTO motorcycle (vehicleID, luggageSize, fuelCapacity) VALUES ('$vehicleId', '$luggageSize', '$fuelCapacity')";
                 $result = mysqli_query($conn, $query2);
-                echo $query2;
+                // echo $query2;
             }
 
             if ($result) {
@@ -115,6 +111,8 @@
     function getVehicleList() {
         global $conn;
 
+        // $query = "SELECT * FROM vehicle LEFT JOIN car ON vehicle.id LEFT JOIN truck ON vehicle.id LEFT JOIN motorcycle ON vehicle.id WHERE customerId = 28";
+        // $query = "SELECT Vehicles.id AS vehicle_id, Vehicles.type, Vehicles.model, Vehicles.year, Vehicles.passengers, Vehicles.manufacturer, Vehicles.price, Cars.fuelType, Cars.trunkSize FROM Vehicles JOIN Cars ON Vehicles.id = Cars.vehicle_id";
         $query = "SELECT * FROM vehicle";
         $query_run = mysqli_query($conn, $query);
 
@@ -149,21 +147,21 @@
         }
     }
 
-    function getVehicle($vehicleParams) {
+    function getVehiclebyCustomerId($vehicleParams) {
         global $conn;
 
         if ($vehicleParams['id'] == null) {
-            return error422('Enter your vehicle id');
+            return error422('Enter your customer id to get thier vehicle list');
         }
 
         $vehicleId = mysqli_real_escape_string($conn, $vehicleParams['id']);
 
-        $query = "SELECT * FROM vehicle WHERE id = '$vehicleId' LIMIT 1";
+        $query = "SELECT * FROM vehicle WHERE vehicle.customerId = '$vehicleId'";
         $result = mysqli_query($conn, $query);
 
         if($result) {
-            $res = mysqli_fetch_assoc($result);
-            if (mysqli_num_rows($result) == 1) {
+            $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            if (mysqli_num_rows($result)) {
                 
 
                 $data = [
@@ -203,7 +201,7 @@
             return error422('Enter the customer id');
         }
 
-        $vehicleId = mysqli_real_escape_string($conn, $vehicleParams['id']);
+        $thisvehicleId = mysqli_real_escape_string($conn, $vehicleParams['id']);
 
         $customerId = mysqli_real_escape_string($conn, $vehicleInput['customerId']);
         $type = mysqli_real_escape_string($conn, $vehicleInput['type']);
@@ -212,11 +210,44 @@
         $passengerCount = mysqli_real_escape_string($conn, $vehicleInput['passengerCount']);
         $manufacturer = mysqli_real_escape_string($conn, $vehicleInput['manufacturer']);
         $price = mysqli_real_escape_string($conn, $vehicleInput['price']);
+
+        $fuelType = mysqli_real_escape_string($conn, $vehicleInput['fuelType']);
+        $trunkSize = mysqli_real_escape_string($conn, $vehicleInput['trunkSize']);
+
+        $wheelCount = mysqli_real_escape_string($conn, $vehicleInput['wheelCount']);
+        $cargoAreaSize = mysqli_real_escape_string($conn, $vehicleInput['cargoAreaSize']);
+
+        $luggageSize = mysqli_real_escape_string($conn, $vehicleInput['luggageSize']);
+        $fuelCapacity = mysqli_real_escape_string($conn, $vehicleInput['fuelCapacity']);
+
+        if ($type == "Car") {
+            if (empty(trim($fuelType))) {
+                return error422("Enter fuel type");
+            } else if (empty(trim($trunkSize))) {
+                return error422("Enter trunk size");
+            }
         
+        } else if ($type == 'Truck') {
+            if (empty(trim($wheelCount))) {
+                return error422("Enter wheel count");
+            } else if (empty(trim($cargoAreaSize))) {
+                return error422("Enter cargo area size");
+            }
+        
+
+        } else if ($type == 'Motorcycle') {
+            if (empty(trim($luggageSize))) {
+                return error422("Enter luggage size");
+            } else if (empty(trim($fuelCapacity))) {
+                return error422("Enter fuel capacity");
+            }
+        
+        }
+
         if (empty(trim($customerId))) {
             return error422("Enter customer ID");
         } else if (empty(trim($type))) {
-            return error422("Enter vehicle type ");
+            return error422("Enter vehicle type");
         } else if (empty(trim($model))) {
             return error422("Enter vehicle model");
         } else if (empty(trim($year))){
@@ -227,16 +258,30 @@
             return error422("Enter vehicle manufacturer");
         } else if (empty(trim($price))) {
             return error422("Enter vehicle price");
-        }
+        } 
 
         else {
-            $query = "UPDATE vehicle SET customerId='$customerId', type='$type', model='$model', year='$year', passengerCount='$passengerCount', manufacturer='$manufacturer', price='$price' WHERE id='$vehicleId' LIMIT 1";
+            $query = "UPDATE vehicle SET customerId='$customerId', type='$type', model='$model', year='$year', passengerCount='$passengerCount', manufacturer='$manufacturer', price='$price' WHERE id='$thisvehicleId' LIMIT 1";
             $result = mysqli_query($conn, $query);
+
+            if ($type == "Car") {
+                $query2 = "UPDATE car SET vehicleId='$thisvehicleId', fuelType='$fuelType', trunkSize='$trunkSize' WHERE vehicleId='$thisvehicleId'";
+                echo $query2;
+                $result = mysqli_query($conn, $query2);
+            } else if ($type == 'Truck') {
+                $query2 = "UPDATE car SET vehicleId='$thisvehicleId', wheelCount='$wheelCount', cargoAreaSize='$cargoAreaSize' WHERE vehicleId='$thisvehicleId'";
+                $result = mysqli_query($conn, $query2);
+                echo $query2;
+            } else if ($type == 'Motorcycle') {
+                $query2 = "UPDATE car SET vehicleId='$thisvehicleId', luggageSize='$luggageSize', fuelCapacity='$fuelCapacity' WHERE vehicleId='$thisvehicleId'";
+                $result = mysqli_query($conn, $query2);
+                echo $query2;
+            }
             
             if ($result) {
                 $data = [
                     'status' => 200,
-                    'message' => 'Customer Updated Successfully',
+                    'message' => 'Customer Car Updated Successfully',
                     'data' => $result
                 ];
                 header("HTTP/1.0 200 Success");

@@ -12,12 +12,9 @@
     if ($requestMethod == "GET") {
 
         if (isset($_GET['id'])) {
-            $vehicle = getVehiclebyCustomerId($_GET);
-            echo $vehicle;
-        } else {
-            $vehicleList = getVehicleList();
-            echo $vehicleList;
-        }
+            $customer = getTotalPriceByCustomerId($_GET);
+            echo $customer;
+        } 
         
     } else {
         $data = [
