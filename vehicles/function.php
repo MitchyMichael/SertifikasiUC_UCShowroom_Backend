@@ -22,7 +22,40 @@
         $passengerCount = mysqli_real_escape_string($conn, $vehicleInput['passengerCount']);
         $manufacturer = mysqli_real_escape_string($conn, $vehicleInput['manufacturer']);
         $price = mysqli_real_escape_string($conn, $vehicleInput['price']);
+
+        $fuelType = mysqli_real_escape_string($conn, $vehicleInput['fuelType']);
+        $trunkSize = mysqli_real_escape_string($conn, $vehicleInput['trunkSize']);
+
+        $wheelCount = mysqli_real_escape_string($conn, $vehicleInput['wheelCount']);
+        $cargoAreaSize = mysqli_real_escape_string($conn, $vehicleInput['cargoAreaSize']);
+
+        $luggageSize = mysqli_real_escape_string($conn, $vehicleInput['luggageSize']);
+        $fuelCapacity = mysqli_real_escape_string($conn, $vehicleInput['fuelCapacity']);
+
+        if ($type == "Car") {
+            if (empty(trim($fuelType))) {
+                return error422("Enter fuel type");
+            } else if (empty(trim($trunkSize))) {
+                return error422("Enter trunk size");
+            }
         
+        } else if ($type == 'Truck') {
+            if (empty(trim($wheelCount))) {
+                return error422("Enter wheel count");
+            } else if (empty(trim($cargoAreaSize))) {
+                return error422("Enter cargo area size");
+            }
+        
+
+        } else if ($type == 'Motorcycle') {
+            if (empty(trim($luggageSize))) {
+                return error422("Enter luggage size");
+            } else if (empty(trim($fuelCapacity))) {
+                return error422("Enter fuel capacity");
+            }
+        
+        }
+
         if (empty(trim($customerId))) {
             return error422("Enter customer ID");
         } else if (empty(trim($type))) {
@@ -37,11 +70,30 @@
             return error422("Enter vehicle manufacturer");
         } else if (empty(trim($price))) {
             return error422("Enter vehicle price");
-        }
+        } 
 
         else {
             $query = "INSERT INTO vehicle (customerId, type, model, year, passengerCount, manufacturer, price) VALUES (' $customerId', '$type', '$model', '$year', '$passengerCount', '$manufacturer', '$price')";
+            // echo $query;
             $result = mysqli_query($conn, $query);
+            // echo $result;
+
+            $vehicleId = $conn->insert_id;
+            // echo $vehicleId;
+
+            if ($type == "Car") {
+                $query2 = "INSERT INTO car (vehicleId, fuelType, trunkSize) VALUES ('$vehicleId', '$fuelType', '$trunkSize')";
+                echo $query2;
+                $result = mysqli_query($conn, $query2);
+            } else if ($type == 'Truck') {
+                $query2 = "INSERT INTO truck (vehicleID, wheelCount, cargoAreaSize) VALUES ('$vehicleId', '$wheelCount', '$cargoAreaSize')";
+                $result = mysqli_query($conn, $query2);
+                echo $query2;
+            } else if ($type == 'Motorcycle') {
+                $query2 = "INSERT INTO motorcycle (vehicleID, luggageSize, fuelCapacity) VALUES ('$vehicleId', '$luggageSize', '$fuelCapacity')";
+                $result = mysqli_query($conn, $query2);
+                echo $query2;
+            }
 
             if ($result) {
                 $data = [
