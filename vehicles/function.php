@@ -308,8 +308,17 @@
 
         $vehicleID = mysqli_real_escape_string($conn, $vehicleParams['id']);
 
-        $query = "DELETE FROM vehicle WHERE id='$vehicleID' LIMIT 1";
+        $query = "DELETE FROM car WHERE vehicleId = '$vehicleID'";
         $result = mysqli_query($conn, $query);
+
+        $query2 = "DELETE FROM truck WHERE vehicleId ='$vehicleID'";
+        $result2 = mysqli_query($conn, $query2);
+
+        $query3 = "DELETE FROM motorcycle WHERE vehicleId = '$vehicleID'";
+        $result3 = mysqli_query($conn, $query3);
+
+        $query4 = "DELETE FROM vehicle WHERE id='$vehicleID'";
+        $result4 = mysqli_query($conn, $query4);
 
         if ($result) {
             $data = [
